@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char * readFile(const char *filepath);
+const char * readFile(const char * filepath);
 
 #endif

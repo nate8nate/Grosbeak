@@ -1,11 +1,12 @@
 #include "shader.h"
 
-GLuint loadShaders(const char *vertexPath, const char *fragmentPath)
+GLuint loadShaders(const char * vertexPath,
+                   const char * fragmentPath)
 {
   GLuint program;
 
-  const GLchar *vertexFile   = readFile(vertexPath);
-  const GLchar *fragmentFile = readFile(fragmentPath);
+  const GLchar * vertexFile = readFile(vertexPath);
+  const GLchar * fragmentFile = readFile(fragmentPath);
   GLuint vertexShader, fragmentShader;
   GLint success;
   GLchar infoLog[512];

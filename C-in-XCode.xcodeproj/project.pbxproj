@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9D4EB6091D0638D20013E593 /* mesh.c in Sources */ = {isa = PBXBuildFile; fileRef = 9D4EB6071D0638D20013E593 /* mesh.c */; };
 		9D66679B1CED114C005734FD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D66679A1CED114C005734FD /* OpenGL.framework */; };
 		9DD730D71CE28A9C008575AF /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9DD730D61CE28A9C008575AF /* SDL2.framework */; };
 		9DD731021CE28D68008575AF /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 9DD730F51CE28D68008575AF /* io.c */; };
@@ -30,6 +31,10 @@
 /* Begin PBXFileReference section */
 		9D07AC741CECAACF00EEB0C6 /* gouraudShader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = gouraudShader.vert; path = src/gouraudShader.vert; sourceTree = "<group>"; };
 		9D07AC751CECAAEF00EEB0C6 /* gouraudShader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = gouraudShader.frag; path = src/gouraudShader.frag; sourceTree = "<group>"; };
+		9D4EB6041D05C4720013E593 /* libassimp.3.2.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libassimp.3.2.0.dylib; path = ../../../../usr/local/Cellar/assimp/3.2/lib/libassimp.3.2.0.dylib; sourceTree = "<group>"; };
+		9D4EB6061D05C4FF0013E593 /* test.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = test.dae; sourceTree = "<group>"; };
+		9D4EB6071D0638D20013E593 /* mesh.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mesh.c; path = src/mesh.c; sourceTree = "<group>"; };
+		9D4EB6081D0638D20013E593 /* mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mesh.h; path = src/mesh.h; sourceTree = "<group>"; };
 		9D6667951CECD3FD005734FD /* flatShader.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = flatShader.frag; path = "/Users/nathandietzenbach/Desktop/C-in-XCode/src/flatShader.frag"; sourceTree = "<absolute>"; };
 		9D6667961CECD40D005734FD /* flatShader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = flatShader.vert; path = src/flatShader.vert; sourceTree = "<group>"; };
 		9D66679A1CED114C005734FD /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -66,6 +71,8 @@
 		9DD730A71CE28792008575AF = {
 			isa = PBXGroup;
 			children = (
+				9D4EB6061D05C4FF0013E593 /* test.dae */,
+				9D4EB6041D05C4720013E593 /* libassimp.3.2.0.dylib */,
 				9D66679A1CED114C005734FD /* OpenGL.framework */,
 				9DD730D61CE28A9C008575AF /* SDL2.framework */,
 				9DD730F21CE28D59008575AF /* src */,
@@ -101,6 +108,8 @@
 				9D07AC751CECAAEF00EEB0C6 /* gouraudShader.frag */,
 				9D6667951CECD3FD005734FD /* flatShader.frag */,
 				9D6667961CECD40D005734FD /* flatShader.vert */,
+				9D4EB6071D0638D20013E593 /* mesh.c */,
+				9D4EB6081D0638D20013E593 /* mesh.h */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -161,6 +170,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D4EB6091D0638D20013E593 /* mesh.c in Sources */,
 				9DD731051CE28D68008575AF /* shader.c in Sources */,
 				9DD731031CE28D68008575AF /* main.c in Sources */,
 				9DD731021CE28D68008575AF /* io.c in Sources */,
@@ -214,7 +224,7 @@
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = NO;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
@@ -276,7 +286,7 @@
 				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_FIELD_INITIALIZERS = YES;
-				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = NO;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = YES;
@@ -307,7 +317,10 @@
 					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/usr/local/Cellar/assimp/3.2/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -320,7 +333,10 @@
 					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/lib,
+					/usr/local/Cellar/assimp/3.2/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

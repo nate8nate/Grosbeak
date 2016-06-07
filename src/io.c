@@ -1,10 +1,10 @@
 #include "io.h"
 
-char* readFile(const char *filepath)
+const char * readFile(const char * filepath)
 {
-  FILE *f;
+  FILE * f;
   long size;
-  char *buffer;
+  char * buffer;
 
   f = fopen(filepath, "r");
   if (!f) {
@@ -15,21 +15,18 @@ char* readFile(const char *filepath)
   size = ftell(f);
   rewind(f);
 
-  buffer = malloc(size+1);
+  buffer = calloc(1, size+1);
   if (!buffer) {
     fclose(f);
     fprintf(stderr, "Memory allocation reading %s failed\n", filepath);
-    return "";
   }
 
-  if (fread(buffer, size, 1, f) != 1) {
+  if (fread((void *) buffer, size, 1, f) != 1) {
     fclose(f);
-    free(buffer);
+    free((void *) buffer);
     fprintf(stderr, "Could not read %s\n", filepath);
-    return "";
   }
 
   fclose(f);
-  buffer[size] = '\0';
   return buffer;
 }

@@ -10,6 +10,7 @@
 #include "stb_image.h"
 #include "linmath.h"
 
+#include "mesh.h"
 #include "shader.h"
 
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -48,6 +49,9 @@ int main(void) {
   GLuint lightAmbientLoc = glGetUniformLocation(lightingSP, "light.ambient");
   GLuint lightDiffuseLoc = glGetUniformLocation(lightingSP, "light.diffuse");
   GLuint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
+
+  struct mesh m;
+  loadMesh(m, "../Cube.mesh");
 
   GLfloat vertices[] = {
     // Positions          // Normals

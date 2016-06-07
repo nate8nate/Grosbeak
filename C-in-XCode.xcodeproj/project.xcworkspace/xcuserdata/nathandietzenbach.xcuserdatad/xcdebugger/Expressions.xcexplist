@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "readFile:io.c">
+      </ContextState>
+      <ContextState
+         contextName = "loadMesh:mesh.c">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
