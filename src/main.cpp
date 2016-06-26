@@ -33,12 +33,13 @@ int main(void) {
 
   glViewport(0,0, width, height);
   glEnable(GL_DEPTH_TEST);
-//  glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 
 //  GLuint lightingSP = loadShaders("shaders/phong.vert", "shaders/phong.frag");
-  GLuint lightingSP = loadShaders("shaders/gouraud.vert", "shaders/gouraud.frag");
+//  GLuint lightingSP = loadShaders("shaders/gouraud.vert", "shaders/gouraud.frag");
 //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
 //  GLuint lightingSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
+    GLuint lightingSP = loadShaders("shaders/normal.vert", "shaders/normal.frag");
   GLuint lightObjectSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
 
   GLint matAmbientLoc = glGetUniformLocation(lightingSP, "material.ambient");
@@ -346,7 +347,6 @@ int main(void) {
       glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
       glDrawElements(GL_TRIANGLES, m.numIndices, GL_UNSIGNED_SHORT, (void *)0);
     }
-    printf("%f - %f\n", angle, normalMatrix.CR[3][3]);
     glBindVertexArray(0);
 
     glUseProgram(lightObjectSP);
