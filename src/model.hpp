@@ -1,9 +1,8 @@
-#ifndef mesh_hpp
-#define mesh_hpp
+#ifndef model_hpp
+#define model_hpp
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "io.hpp"
 #include "linear_math.hpp"
 
 struct vertex {
@@ -19,7 +18,14 @@ struct mesh {
   unsigned short * indices;
 };
 
-mesh loadMesh(const char * path);
-void destroyMesh(mesh m);
+struct model {
+  mesh mesh;
+  vec3 location;
+  quat rotation;
+  vec3 scale;
+};
+
+model loadModel(const char * path);
+void destroyModel(model d);
 
 #endif

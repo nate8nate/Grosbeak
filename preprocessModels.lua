@@ -14,6 +14,11 @@ for i=1, #paths do
   local offset
 
   local meshName
+
+  local location = {}
+  local rotation = {}
+  local scale = {}
+
   local vertices = {}
   local positions = {}
   local normals = {}
@@ -25,6 +30,40 @@ for i=1, #paths do
 
   local meshLocation
   meshName, meshLocation = string.match(fbx, 'Model:%s"Model::(%w+)",%s"Mesh()"', objectsLocation)
+
+  local locationLocation = string.match(fbx, 'Property: "Lcl Translation", "Lcl Translation", "A%+",()', meshLocation)
+  offset = locationLocation
+  for i=1,3 do
+    num, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
+    table.insert(location, num)
+  end
+
+  local euler = {}
+  local rotationLocation = string.match(fbx, 'Property: "Lcl Rotation", "Lcl Rotation", "A%+",()', meshLocation)
+  offset = rotationLocation
+  for i=1,3 do
+    num, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
+    num = num * math.pi/180
+    table.insert(euler, num)
+  end
+
+  local c1 = math.cos(euler[1]/2)
+  local c2 = math.cos(euler[2]/2)
+  local c3 = math.cos(euler[3]/2)
+  local s1 = math.sin(euler[1]/2)
+  local s2 = math.sin(euler[2]/2)
+  local s3 = math.sin(euler[3]/2)
+  table.insert(rotation, c1*c2*c3 - s1*s2*s3)
+  table.insert(rotation, c1*c2*s3 + s1*s2*c3)
+  table.insert(rotation, s1*c2*c3 + c1*s2*s3)
+  table.insert(rotation, c1*s2*c3 - s1*c2*s3)
+
+  local scaleLocation = string.match(fbx, 'Property: "Lcl Scaling", "Lcl Scaling", "A%+",()', meshLocation)
+  offset = scaleLocation
+  for i=1,3 do
+    num, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
+    table.insert(scale, num)
+  end
 
   local positionsLocation = string.match(fbx, 'Vertices:%s()', meshLocation)
   local endOfPositions = string.match(fbx, '()PolygonVertexIndex:', positionsLocation)
@@ -74,7 +113,10 @@ for i=1, #paths do
     table.insert(vertices, normals[v+2])
   end
 
-  local meshFile = io.open(string.format("%s.mesh", meshName), 'w')
+  local meshFile = io.open(string.format("%s.model", meshName), 'w')
+  writeTable(meshFile, location, "%f")
+  writeTable(meshFile, rotation, "%f")
+  writeTable(meshFile, scale, "%f")
   meshFile:write(#positions/3, ' ')
   writeTable(meshFile, vertices, "%f")
   meshFile:write(#vertexIndices, ' ')

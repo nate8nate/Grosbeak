@@ -41,7 +41,7 @@ static inline float mag(vec##n v) {\
 }\
 static inline vec##n normalize(vec##n v) {\
   vec##n res;\
-  float magnitude = mag(v);\
+  const float magnitude = mag(v);\
   for (int i=0; i<n; ++i) {\
     res.A[i] = v.A[i]/magnitude;\
   }\
@@ -109,6 +109,36 @@ static inline vec3 cross(vec3 u, vec3 v) {
               u.x * v.y - u.y * v.x);
 }
 
+
+union quat {
+  float A[4];
+  struct {
+    float r;
+    float i;
+    float j;
+    float k;
+  };
+  struct {
+    float w;
+    vec3 v;
+  };
+};
+
+static inline quat Quat(float r, float i, float j, float k) {
+  quat q;
+  q.r = r;
+  q.i = i;
+  q.j = j;
+  q.k = k;
+  return q;
+}
+
+static inline quat Quat(vec3 axis, float angle) {
+  float s = sinf(angle/2);
+  return Quat(cosf(angle/2), axis.x*s, axis.y*s, axis.z*s);
+}
+
+
 union mat4 {
   float CR[4][4];
   float flat[16];
@@ -170,67 +200,35 @@ static inline mat4 translate(mat4 m, vec3 v) {
   return translation(v.x,v.y,v.z) * m;
 }
 
-inline mat4 rotationX(float angle) {
-  float cos_t = cosf(angle);
-  float sin_t = sinf(angle);
+static inline mat4 rotation(float x, float y, float z, float angle) {
+  const float c = cosf(angle);
+  const float s = sinf(angle);
   return Mat4(
-    1.f, 0.f,    0.f,   0.f,
-    0.f, cos_t, -sin_t, 0.f,
-    0.f, sin_t,  cos_t, 0.f,
-    0.f, 0.f,    0.f,   1.f
-  );
-}
-
-static inline mat4 rotateX(mat4 m, float angle) {
-  mat4 r = rotationX(angle);
-  return r*m;
-}
-
-static inline mat4 rotationY(float angle) {
-  float cos_t = cosf(angle);
-  float sin_t = sinf(angle);
-  return Mat4(
-    cos_t, 0.f, sin_t, 0.f,
-    0.f,   1.f, 0.f,   0.f,
-   -sin_t, 0.f, cos_t, 0.f,
-    0.f,   0.f, 0.f,   1.f
-  );
-}
-
-static inline mat4 rotateY(mat4 m, float angle) {
-  mat4 r = rotationX(angle);
-  return r*m;
-}
-
-static inline mat4 rotationZ(float angle) {
-  float cos_t = cosf(angle);
-  float sin_t = sinf(angle);
-  return Mat4(
-    cos_t, -sin_t, 0.f, 0.f,
-    sin_t,  cos_t, 0.f, 0.f,
-    0.f,    0.f,   0.f, 0.f,
-    0.f,    0.f,   0.f, 1.f
-  );
-}
-
-static inline mat4 rotateZ(mat4 m, float angle) {
-  mat4 r = rotationX(angle);
-  return r*m;
-}
-
-static inline mat4 rotate(mat4 m, float x, float y, float z, float angle) {
-  float c = cosf(angle);
-  float s = sinf(angle);
-  mat4 r = Mat4(
     x*x+(1-x*x)*c, x*y*(1-c)-z*s, x*z*(1-c)+y*s, 0,
     x*y*(1-c)+z*s, y*y+(1-y*y)*c, y*z*(1-c)-x*s, 0,
     x*z*(1-c)-y*s, y*z*(1-c)+x*s, z*z+(1-z*z)*c, 0,
     0,             0,             0,             1);
-  return r*m;
 }
 
-static inline mat4 rotate(mat4 m, vec3 axis, float angle) {
-  return rotate(m, axis.x, axis.y, axis.z, angle);
+static inline mat4 rotation(quat q) {
+  const float n = q.r*q.r + q.i*q.i + q.j*q.j + q.k*q.k;
+  const float s = (n == 0) ? 0 : 2.f/n;
+  const float ri = s*q.r*q.i, rj = s*q.r*q.j, rk = s*q.r*q.k,
+              ii = s*q.i*q.i, ij = s*q.i*q.j, ik = s*q.i*q.k,
+              jj = s*q.j*q.j, jk = s*q.j*q.k, kk = s*q.k*q.k;
+  return Mat4(
+    1-jj-kk, ij-rk,   ik+rj,   0,
+    ij+rk,   1-ii-kk, jk-ri,   0,
+    ik-rj,   jk+ri,   1-ii-jj, 0,
+    0,       0,       0,       1);
+}
+
+static inline mat4 rotate(mat4 m, float x, float y, float z, float angle) {
+  return rotation(x,y,z, angle)*m;
+}
+
+static inline mat4 rotate(mat4 m, quat q) {
+  return rotation(q)*m;
 }
 
 static inline mat4 scaling(float x, float y, float z) {
@@ -242,7 +240,7 @@ static inline mat4 scaling(float x, float y, float z) {
 }
 
 static inline mat4 scale(mat4 m, float x, float y, float z) {
-  mat4 s = scaling(x,y,z);
+  const mat4 s = scaling(x,y,z);
   return s*m;
 }
 
@@ -261,8 +259,8 @@ static inline mat4 transpose(mat4 m) {
 }
 
 static inline mat4 inverse(mat4 m) {
-  mat4 t = transpose(m);
-  float pairs[24] = {
+  const mat4 t = transpose(m);
+  const float pairs[24] = {
     t.flat[10]*t.flat[15],
     t.flat[11]*t.flat[14],
     t.flat[9]*t.flat[15],
@@ -287,7 +285,7 @@ static inline mat4 inverse(mat4 m) {
     t.flat[2]*t.flat[4],
     t.flat[0]*t.flat[5],
     t.flat[1]*t.flat[4]};
-  float cofactors[16] = {
+  const float cofactors[16] = {
     pairs[0]*t.flat[5] + pairs[3]*t.flat[6] + pairs[4]*t.flat[7] -
     pairs[1]*t.flat[5] - pairs[2]*t.flat[6] - pairs[5]*t.flat[7],
     pairs[1]*t.flat[4] + pairs[6]*t.flat[6] + pairs[9]*t.flat[7] -
@@ -320,7 +318,7 @@ static inline mat4 inverse(mat4 m) {
     pairs[22]*t.flat[11] - pairs[14]*t.flat[8] - pairs[19]*t.flat[9],
     pairs[22]*t.flat[10] + pairs[16]*t.flat[8] + pairs[21]*t.flat[9] -
     pairs[20]*t.flat[9] - pairs[23]*t.flat[10] - pairs[17]*t.flat[8]};
-  float det = 1.f/(t.flat[0]*cofactors[0] + t.flat[1]*cofactors[1] + t.flat[2]*cofactors[2] + t.flat[3]*cofactors[3]);
+  const float det = 1.f/(t.flat[0]*cofactors[0] + t.flat[1]*cofactors[1] + t.flat[2]*cofactors[2] + t.flat[3]*cofactors[3]);
 
   mat4 res;
   for (int i=0; i<16; ++i) {
@@ -330,19 +328,15 @@ static inline mat4 inverse(mat4 m) {
 }
 
 static inline mat4 lookAt(vec3 eye, vec3 at, vec3 up) {
-  vec3 forward = normalize(at-eye);
-  vec3 right = normalize(cross(forward,up));
-  vec3 top = cross(right,forward);
+  const vec3 forward = normalize(at-eye);
+  const vec3 right = normalize(cross(forward,up));
+  const vec3 top = cross(right,forward);
 
-  mat4 m = Mat4(
+  return Mat4(
     right.x,    right.y,    right.z,   0.f,
     top.x,      top.y,      top.z,     0.f,
    -forward.x, -forward.y, -forward.z, 0.f,
     0.f,        0.f,        0.f,       1.f);
-
-  mat4 t = translation(-eye);
-  mat4 res = t*m;
-  return res;
 }
 
 static inline mat4 perspective(float fov, float aspect, float n, float f) {
