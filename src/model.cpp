@@ -25,6 +25,9 @@ model loadModel(const char * path) {
     fscanf(modelFile, "%f", &d.mesh.vertices[i].normal.x);
     fscanf(modelFile, "%f", &d.mesh.vertices[i].normal.y);
     fscanf(modelFile, "%f", &d.mesh.vertices[i].normal.z);
+    fscanf(modelFile, "%f", &d.mesh.vertices[i].color.x);
+    fscanf(modelFile, "%f", &d.mesh.vertices[i].color.y);
+    fscanf(modelFile, "%f", &d.mesh.vertices[i].color.z);
   }
 
   fscanf(modelFile, "%u", &d.mesh.numIndices);

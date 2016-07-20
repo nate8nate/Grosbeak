@@ -11,6 +11,13 @@ static inline vec##n operator*(float s, vec##n v) {\
   }\
   return res;\
 }\
+static inline float operator*(vec##n u, vec##n v) {\
+  float res;\
+  for (int i=0; i<n; ++i) {\
+    res += u.A[i] * v.A[i];\
+  }\
+  return res;\
+}\
 static inline vec##n operator+(vec##n u, vec##n v) {\
   vec##n res;\
   for (int i=0; i<n; ++i) {\
@@ -133,11 +140,27 @@ static inline quat Quat(float r, float i, float j, float k) {
   return q;
 }
 
-static inline quat Quat(vec3 axis, float angle) {
+static inline quat Quat(float angle, vec3 axis) {
   float s = sinf(angle/2);
   return Quat(cosf(angle/2), axis.x*s, axis.y*s, axis.z*s);
 }
 
+static inline quat operator+(quat q1, quat q2) {
+  return Quat(q1.r+q1.r, q1.v+q2.v);
+}
+
+static inline quat operator*(quat q1, quat q2) {
+  return Quat(q1.r*q2.r - q1.v*q2.v, cross(q1.v,q2.v) + q1.r*q2.v + q2.r*q1.v);
+}
+
+static inline quat operator*=(quat q1, quat q2) {
+  return q1 * q2;
+}
+
+static inline quat normalize(quat q) {
+  const float mag = sqrtf(q.r*q.r + q.i*q.i + q.j*q.j + q.k*q.k);
+  return Quat(q.r/mag, q.i/mag, q.j/mag, q.k/mag);
+}
 
 union mat4 {
   float CR[4][4];

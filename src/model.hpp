@@ -8,6 +8,7 @@
 struct vertex {
   vec3 position;
   vec3 normal;
+  vec3 color;
 };
 
 struct mesh {

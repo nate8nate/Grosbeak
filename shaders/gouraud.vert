@@ -32,6 +32,7 @@ out vec3 vColor;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+layout (location = 2) in vec3 color;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -63,7 +64,7 @@ void main()
     vec3 ambient = dirLight.ambient * material.ambient;
     
     float dScalar = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = dirLight.diffuse * (dScalar * material.diffuse);
+    vec3 diffuse = dirLight.diffuse * (dScalar * color);
     
     float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = dirLight.specular * (sScalar * material.specular);
@@ -81,7 +82,7 @@ void main()
     vec3 ambient = attenuation * (pointLights[i].ambient * material.ambient);
     
     float dScalar = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = attenuation * (pointLights[i].diffuse * (dScalar * material.diffuse));
+    vec3 diffuse = attenuation * (pointLights[i].diffuse * (dScalar * color));
     
     float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = attenuation * (pointLights[i].specular * (sScalar * material.specular));

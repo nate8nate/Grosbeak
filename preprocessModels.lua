@@ -54,8 +54,8 @@ for i=1, #paths do
   local s2 = math.sin(euler[2]/2)
   local s3 = math.sin(euler[3]/2)
   table.insert(rotation, c1*c2*c3 - s1*s2*s3)
-  table.insert(rotation, c1*c2*s3 + s1*s2*c3)
   table.insert(rotation, s1*c2*c3 + c1*s2*s3)
+  table.insert(rotation, c1*c2*s3 + s1*s2*c3)
   table.insert(rotation, c1*s2*c3 - s1*c2*s3)
 
   local scaleLocation = string.match(fbx, 'Property: "Lcl Scaling", "Lcl Scaling", "A%+",()', meshLocation)
@@ -93,15 +93,20 @@ for i=1, #paths do
     num1, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
     num2, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
     num3, offset = string.match(fbx, '(%-?%d+%.%d+),?()', offset)
-    local x,y,z = vertexIndices[vi]*3+1, vertexIndices[vi]*3+2, vertexIndices[vi]*3+3
-    normals[x] = (normals[x] or 0) + num1
-    normals[y] = (normals[y] or 0) + num2
-    normals[z] = (normals[z] or 0) + num3
-  end
-  for n=1,#normals,3 do
-    local x,y,z = normals[n],normals[n+1],normals[n+2]
-    local m = math.sqrt(x*x + y*y + z*z)
-    normals[n],normals[n+1],normals[n+2] = x/m, y/m, z/m
+    local mag = math.sqrt(num1*num1 + num2*num2 + num3*num3)
+    num1,num2,num3 = num1/mag, num2/mag, num3/mag
+    table.insert(normals, num1)
+    table.insert(normals, num2)
+    table.insert(normals, num3)
+    -- local x,y,z = vertexIndices[vi]*3+1, vertexIndices[vi]*3+2, vertexIndices[vi]*3+3
+    -- normals[x] = (normals[x] or 0) + num1
+    -- normals[y] = (normals[y] or 0) + num2
+    -- normals[z] = (normals[z] or 0) + num3
+  -- end
+  -- for n=1,#normals,3 do
+  --   local x,y,z = normals[n],normals[n+1],normals[n+2]
+  --   local m = math.sqrt(x*x + y*y + z*z)
+  --   normals[n],normals[n+1],normals[n+2] = x/m, y/m, z/m
   end
 
   for v=1,#positions,3 do
@@ -113,7 +118,7 @@ for i=1, #paths do
     table.insert(vertices, normals[v+2])
   end
 
-  local meshFile = io.open(string.format("%s.model", meshName), 'w')
+  local meshFile = io.open(string.format("models/%s.model", meshName), 'w')
   writeTable(meshFile, location, "%f")
   writeTable(meshFile, rotation, "%f")
   writeTable(meshFile, scale, "%f")

@@ -49,7 +49,7 @@ int main(void) {
   GLuint lightingSP = loadShaders("shaders/gouraud.vert", "shaders/gouraud.frag");
 //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
 //  GLuint lightingSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
-//    GLuint lightingSP = loadShaders("shaders/normal.vert", "shaders/normal.frag");
+  GLuint normalSP = loadShaders("shaders/normal.vert", "shaders/normal.geom", "shaders/normal.frag");
   GLuint lightObjectSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
 
   GLint matAmbientLoc = glGetUniformLocation(lightingSP, "material.ambient");
@@ -61,8 +61,8 @@ int main(void) {
   GLint lightDiffuseLoc = glGetUniformLocation(lightingSP, "light.diffuse");
   GLint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
 
-//  model d = loadModel("models/Cube.model");
-  model d = loadModel("models/Suzanne.model");
+  model d = loadModel("meshes/Cube.mesh");
+//  model d = loadModel("models/Icosphere.model");
 
 //  vec3 cubePositions[] = {
 //    Vec3( 0.0f,  0.0f,  0.0f),
@@ -99,6 +99,9 @@ int main(void) {
   // Normals
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, normal));
   glEnableVertexAttribArray(1);
+  // Colors
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, color));
+  glEnableVertexAttribArray(2);
 
   GLuint EBO;
   glGenBuffers(1, &EBO);
@@ -227,10 +230,9 @@ int main(void) {
     view = translation(-cameraPos) * lookAt(cameraPos, cameraTarget, cameraUp);
     projection = perspective(fov, (float)width/height, 0.1f, 100.0f);
 
-    float angle = now/1000.f;
-    d.rotation = Quat(VEC_X, angle);
+    d.rotation *= Quat(dts, VEC_X);
 
-    glClearColor(.4f, 1.f, .8f, 1.f);
+    glClearColor(.4f, .4f, .4f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(lightingSP);
@@ -273,18 +275,6 @@ int main(void) {
     glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].linear"), 0.09);
     glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].quadratic"), 0.032);
 
-//    // SpotLight
-//    glUniform3f(glGetUniformLocation(lightingSP, "spotLight.position"), cameraPos.x, cameraPos.y, cameraPos.z);
-//    glUniform3f(glGetUniformLocation(lightingSP, "spotLight.direction"), cameraFront.x, cameraFront.y, cameraFront.z);
-//    glUniform3f(glGetUniformLocation(lightingSP, "spotLight.ambient"), 0.0f, 0.0f, 0.0f);
-//    glUniform3f(glGetUniformLocation(lightingSP, "spotLight.diffuse"), 1.0f, 1.0f, 1.0f);
-//    glUniform3f(glGetUniformLocation(lightingSP, "spotLight.specular"), 1.0f, 1.0f, 1.0f);
-//    glUniform1f(glGetUniformLocation(lightingSP, "spotLight.constant"), 1.0f);
-//    glUniform1f(glGetUniformLocation(lightingSP, "spotLight.linear"), 0.09);
-//    glUniform1f(glGetUniformLocation(lightingSP, "spotLight.quadratic"), 0.032);
-//    glUniform1f(glGetUniformLocation(lightingSP, "spotLight.cutOff"), cos(.2));
-//    glUniform1f(glGetUniformLocation(lightingSP, "spotLight.outerCutOff"), cos(.25));
-
     GLint cameraPosLoc = glGetUniformLocation(lightingSP, "viewPos");
     glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 
@@ -304,12 +294,25 @@ int main(void) {
 
     glBindVertexArray(VAO);
     mat4 normalMatrix;
-    model = rotation(d.rotation);
-    model = translate(model, d.location);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model.flat);
+    model = translation(d.location);
+    model = rotate(model, d.rotation);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
     normalMatrix = transpose(inverse(model));
     glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
     glDrawElements(GL_TRIANGLES, d.mesh.numIndices, GL_UNSIGNED_SHORT, (void *)0);
+    glBindVertexArray(0);
+
+    glBindVertexArray(VAO);
+    glUseProgram(normalSP);
+    modelLoc = glGetUniformLocation(normalSP, "model");
+    normalMatrixLoc = glGetUniformLocation(normalSP, "normalMatrix");
+    viewLoc = glGetUniformLocation(normalSP, "view");
+    projectionLoc = glGetUniformLocation(normalSP, "projection");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
+    glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.flat);
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.flat);
+    glDrawElements(GL_POINTS, d.mesh.numIndices, GL_UNSIGNED_SHORT, 0);
     glBindVertexArray(0);
 
     glUseProgram(lightObjectSP);

@@ -1,49 +1,80 @@
 #include "shader.hpp"
 
-GLuint loadShaders(const char * vertexPath,
-                   const char * fragmentPath)
-{
-  GLuint program;
-
-  const GLchar * vertexFile = fileToString(vertexPath);
-  const GLchar * fragmentFile = fileToString(fragmentPath);
-  GLuint vertexShader, fragmentShader;
+void loadShader(GLuint shader, const char * shaderPath) {
+  const GLchar * shaderFile = fileToString(shaderPath);
   GLint success;
   GLchar infoLog[512];
 
-  vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexFile, NULL);
-  glCompileShader(vertexShader);
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+  glShaderSource(shader, 1, &shaderFile, NULL);
+  free((void *)shaderFile);
+  glCompileShader(shader);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
   if (!success)
   {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    fprintf(stderr, "'%s' compilation failed: %s\n", vertexPath, infoLog);
+    glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    fprintf(stderr, "'%s' compilation failed: %s\n", shaderPath, infoLog);
   }
+}
 
-  fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentFile, NULL);
-  glCompileShader(fragmentShader);
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    fprintf(stderr, "'%s' compilation failed: %s\n", fragmentPath, infoLog);
-  }
+GLuint loadVertexShader(const char * vertexPath) {
+  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+  loadShader(vertexShader, vertexPath);
+  return vertexShader;
+}
 
-  program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, fragmentShader);
+GLuint loadGeometryShader(const char * geometryPath) {
+  GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+  loadShader(geometryShader, geometryPath);
+  return geometryShader;
+}
+
+GLuint loadFragmentShader(const char * fragmentPath) {
+  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+  loadShader(fragmentShader, fragmentPath);
+  return fragmentShader;
+}
+
+void linkProgram(GLuint program) {
   glLinkProgram(program);
+  GLint success;
+  GLchar infoLog[512];
   glGetProgramiv(program, GL_LINK_STATUS, &success);
   if (!success)
   {
     glGetProgramInfoLog(program, 512, NULL, infoLog);
     fprintf(stderr, "Shader linking failed: %s\n", infoLog);
   }
-  free((void *)vertexFile);
-  free((void *)fragmentFile);
+}
+
+GLuint loadShaders(const char * vertexPath,
+                   const char * fragmentPath) {
+  GLuint vertexShader = loadVertexShader(vertexPath);
+  GLuint fragmentShader = loadFragmentShader(fragmentPath);
+
+  GLuint program = glCreateProgram();
+  glAttachShader(program, vertexShader);
+  glAttachShader(program, fragmentShader);
+  linkProgram(program);
   glDeleteShader(vertexShader);
+  glDeleteShader(fragmentShader);
+
+  return program;
+}
+
+GLuint loadShaders(const char * vertexPath,
+                   const char * geometryPath,
+                   const char * fragmentPath) {
+  GLuint vertexShader = loadVertexShader(vertexPath);
+  GLuint geometryShader = loadGeometryShader(geometryPath);
+  GLuint fragmentShader = loadFragmentShader(fragmentPath);
+
+  GLuint program = glCreateProgram();
+  glAttachShader(program, vertexShader);
+  glAttachShader(program, geometryShader);
+  glAttachShader(program, fragmentShader);
+  linkProgram(program);
+  glDeleteShader(vertexShader);
+  glDeleteShader(geometryShader);
   glDeleteShader(fragmentShader);
 
   return program;
