@@ -4,8 +4,9 @@
 #include "io.hpp"
 #include <OpenGL/gl3.h>
 #include <stdlib.h>
+#include <string.h>
 
-GLuint loadShaders(const char *vertexPath, const char *fragmentPath);
-GLuint loadShaders(const char *vertexPath, const char *geometryPath, const char *fragmentPath);
+GLuint loadShadersFV(const char *shaderName);
+GLuint loadShadersFGV(const char *shaderName);
 
 #endif

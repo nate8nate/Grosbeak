@@ -7,12 +7,8 @@
 #include <OpenGl/gl3.h>
 
 #include "linear_math.hpp"
-#include "model.hpp"
+#include "scene.hpp"
 #include "shader.hpp"
-
-const vec3 VEC_X = Vec3(1.f, 0.f, 0.f);
-const vec3 VEC_Y = Vec3(0.f, 1.f, 0.f);
-const vec3 VEC_Z = Vec3(0.f, 0.f, 1.f);
 
 int main(void) {
   SDL_Init(SDL_INIT_VIDEO);
@@ -45,12 +41,11 @@ int main(void) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 
-//  GLuint lightingSP = loadShaders("shaders/phong.vert", "shaders/phong.frag");
-  GLuint lightingSP = loadShaders("shaders/gouraud.vert", "shaders/gouraud.frag");
+  GLuint lightingSP = loadShadersFV("gouraud");
 //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
 //  GLuint lightingSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
-  GLuint normalSP = loadShaders("shaders/normal.vert", "shaders/normal.geom", "shaders/normal.frag");
-  GLuint lightObjectSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
+  GLuint normalSP = loadShadersFGV("normal");
+  GLuint lightObjectSP = loadShadersFV("shadeless");
 
   GLint matAmbientLoc = glGetUniformLocation(lightingSP, "material.ambient");
   GLint matDiffuseLoc = glGetUniformLocation(lightingSP, "material.diffuse");
@@ -61,54 +56,33 @@ int main(void) {
   GLint lightDiffuseLoc = glGetUniformLocation(lightingSP, "light.diffuse");
   GLint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
 
-  model d = loadModel("meshes/Cube.mesh");
-//  model d = loadModel("models/Icosphere.model");
+  scene s = loadScene("Scene");
 
-//  vec3 cubePositions[] = {
-//    Vec3( 0.0f,  0.0f,  0.0f),
-//    Vec3( 2.0f,  5.0f, -15.0f),
-//    Vec3(-1.5f, -2.2f, -2.5f),
-//    Vec3(-3.8f, -2.0f, -12.3f),
-//    Vec3( 2.4f, -0.4f, -3.5f),
-//    Vec3(-1.7f,  3.0f, -7.5f),
-//    Vec3( 1.3f, -2.0f, -2.5f),
-//    Vec3( 1.5f,  2.0f, -2.5f),
-//    Vec3( 1.5f,  0.2f, -1.5f),
-//    Vec3(-1.3f,  1.0f, -1.5f)
-//  };
-
-  vec3 pointLightPositions[] = {
-    Vec3( 0.7f,  0.2f,  2.0f),
-    Vec3( 2.3f, -3.3f, -4.0f),
-    Vec3(-4.0f,  2.0f, -12.0f),
-    Vec3( 0.0f,  0.0f, -3.0f)
-  };
-
-  GLuint VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  GLuint VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, d.mesh.numVertices*sizeof(vertex), d.mesh.vertices, GL_STATIC_DRAW);
-
-  // Positions
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, position));
-  glEnableVertexAttribArray(0);
-  // Normals
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, normal));
-  glEnableVertexAttribArray(1);
-  // Colors
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, color));
-  glEnableVertexAttribArray(2);
-
-  GLuint EBO;
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, d.mesh.numIndices*sizeof(unsigned short), d.mesh.indices, GL_STATIC_DRAW);
-
-  glBindVertexArray(0);
+  // GLuint VAO;
+  // glGenVertexArrays(1, &VAO);
+  // glBindVertexArray(VAO);
+  //
+  // GLuint VBO;
+  // glGenBuffers(1, &VBO);
+  // glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  // glBufferData(GL_ARRAY_BUFFER, d.mesh.numVertices*sizeof(vertex), d.mesh.vertices, GL_STATIC_DRAW);
+  //
+  // // Positions
+  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, position));
+  // glEnableVertexAttribArray(0);
+  // // Normals
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, normal));
+  // glEnableVertexAttribArray(1);
+  // // Colors
+  // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (GLvoid *)offsetof(vertex, color));
+  // glEnableVertexAttribArray(2);
+  //
+  // GLuint EBO;
+  // glGenBuffers(1, &EBO);
+  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  // glBufferData(GL_ELEMENT_ARRAY_BUFFER, d.mesh.numIndices*sizeof(unsigned short), d.mesh.indices, GL_STATIC_DRAW);
+  //
+  // glBindVertexArray(0);
 
 //  GLuint lightVAO;
 //  glGenVertexArrays(1, &lightVAO);
@@ -230,8 +204,6 @@ int main(void) {
     view = translation(-cameraPos) * lookAt(cameraPos, cameraTarget, cameraUp);
     projection = perspective(fov, (float)width/height, 0.1f, 100.0f);
 
-    d.rotation *= Quat(dts, VEC_X);
-
     glClearColor(.4f, .4f, .4f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -296,6 +268,7 @@ int main(void) {
     mat4 normalMatrix;
     model = translation(d.location);
     model = rotate(model, d.rotation);
+    model = scale(model, d.scale);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
     normalMatrix = transpose(inverse(model));
     glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
@@ -334,7 +307,7 @@ int main(void) {
     SDL_GL_SwapWindow(window);
   }
 
-  destroyModel(d);
+  destroyEntity(e);
 
   glDeleteProgram(lightingSP);
   glDeleteProgram(lightObjectSP);

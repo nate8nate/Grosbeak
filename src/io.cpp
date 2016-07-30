@@ -1,34 +1,22 @@
 #include "io.hpp"
 
-const char * fileToString(const char * filepath)
+const char * fileToString(const char *filepath)
 {
-  FILE * f;
-  unsigned long size;
-  char * buffer;
+  char *result = 0;
 
-  f = fopen(filepath, "r");
-  if (!f) {
-    fprintf(stderr, "Could not open %s\n", filepath);
+  FILE *file;
+  file = fopen(filepath, "r");
+  if (file) {
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    result = (char *)malloc(size+1);
+    fread(result, size, 1, file);
+    result[size] = '\0';
+    
+    fclose(file);
   }
 
-  fseek(f, 0, SEEK_END);
-  size = (unsigned long)ftell(f);
-  rewind(f);
-
-  buffer = (char *)calloc(1, size+1);
-  if (!buffer) {
-    fclose(f);
-    fprintf(stderr, "Memory allocation for %s failed\n", filepath);
-    return "";
-  }
-
-  if (fread((void *) buffer, size, 1, f) != 1) {
-    fclose(f);
-    free((void *) buffer);
-    fprintf(stderr, "Could not read %s\n", filepath);
-    return "";
-  }
-
-  fclose(f);
-  return buffer;
+  return result;
 }

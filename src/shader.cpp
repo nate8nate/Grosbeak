@@ -1,6 +1,12 @@
 #include "shader.hpp"
 
-void loadShader(GLuint shader, const char * shaderPath) {
+const char shaderDir[] = "shaders/";
+
+void loadShader(GLuint shader, const char *shaderName, const char *shaderExt) {
+  char shaderPath[128];
+  strcpy(shaderPath, shaderDir);
+  strcat(shaderPath, shaderName);
+  strcat(shaderPath, shaderExt);
   const GLchar * shaderFile = fileToString(shaderPath);
   GLint success;
   GLchar infoLog[512];
@@ -16,21 +22,21 @@ void loadShader(GLuint shader, const char * shaderPath) {
   }
 }
 
-GLuint loadVertexShader(const char * vertexPath) {
+GLuint loadVertexShader(const char *vertexName) {
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  loadShader(vertexShader, vertexPath);
+  loadShader(vertexShader, vertexName, ".vert");
   return vertexShader;
 }
 
-GLuint loadGeometryShader(const char * geometryPath) {
+GLuint loadGeometryShader(const char *geometryName) {
   GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-  loadShader(geometryShader, geometryPath);
+  loadShader(geometryShader, geometryName, ".geom");
   return geometryShader;
 }
 
-GLuint loadFragmentShader(const char * fragmentPath) {
+GLuint loadFragmentShader(const char *fragmentName) {
   GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  loadShader(fragmentShader, fragmentPath);
+  loadShader(fragmentShader, fragmentName, ".frag");
   return fragmentShader;
 }
 
@@ -46,10 +52,9 @@ void linkProgram(GLuint program) {
   }
 }
 
-GLuint loadShaders(const char * vertexPath,
-                   const char * fragmentPath) {
-  GLuint vertexShader = loadVertexShader(vertexPath);
-  GLuint fragmentShader = loadFragmentShader(fragmentPath);
+GLuint loadShadersFV(const char *shaderName) {
+  GLuint vertexShader = loadVertexShader(shaderName);
+  GLuint fragmentShader = loadFragmentShader(shaderName);
 
   GLuint program = glCreateProgram();
   glAttachShader(program, vertexShader);
@@ -61,12 +66,10 @@ GLuint loadShaders(const char * vertexPath,
   return program;
 }
 
-GLuint loadShaders(const char * vertexPath,
-                   const char * geometryPath,
-                   const char * fragmentPath) {
-  GLuint vertexShader = loadVertexShader(vertexPath);
-  GLuint geometryShader = loadGeometryShader(geometryPath);
-  GLuint fragmentShader = loadFragmentShader(fragmentPath);
+GLuint loadShadersFGV(const char *shaderName) {
+  GLuint vertexShader = loadVertexShader(shaderName);
+  GLuint geometryShader = loadGeometryShader(shaderName);
+  GLuint fragmentShader = loadFragmentShader(shaderName);
 
   GLuint program = glCreateProgram();
   glAttachShader(program, vertexShader);

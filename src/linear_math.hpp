@@ -12,7 +12,7 @@ static inline vec##n operator*(float s, vec##n v) {\
   return res;\
 }\
 static inline float operator*(vec##n u, vec##n v) {\
-  float res;\
+  float res=0.f;\
   for (int i=0; i<n; ++i) {\
     res += u.A[i] * v.A[i];\
   }\
@@ -265,6 +265,10 @@ static inline mat4 scaling(float x, float y, float z) {
 static inline mat4 scale(mat4 m, float x, float y, float z) {
   const mat4 s = scaling(x,y,z);
   return s*m;
+}
+
+static inline mat4 scale(mat4 m, vec3 s) {
+  return scale(m, s.x, s.y, s.z);
 }
 
 static inline mat4 scale(mat4 m, float f) {
