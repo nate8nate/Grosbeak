@@ -3,7 +3,6 @@ layout(points) in;
 layout(line_strip, max_vertices = 2) out;
 
 uniform mat4 model;
-uniform mat4 normalMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -16,7 +15,7 @@ out vec3 gColor;
 
 void main() {
   vec3 normal = vNormal[0];
-  gColor = normal;
+  gColor = abs(normal);
 
   vec4 v0 = gl_in[0].gl_Position;
   gl_Position = projection * view * model * v0;

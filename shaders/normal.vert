@@ -6,5 +6,5 @@ layout (location = 1) in vec3 normal;
 
 void main() {
   gl_Position = vec4(position, 1.0f);
-  vNormal = normal;
+  vNormal = normalize(normal);
 }
