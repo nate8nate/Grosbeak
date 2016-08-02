@@ -2,42 +2,13 @@
 
 const char shaderDir[] = "shaders/";
 
-void loadShader(GLuint shader, const char *shaderName, const char *shaderExt) {
-  char shaderPath[128];
-  strcpy(shaderPath, shaderDir);
-  strcat(shaderPath, shaderName);
-  strcat(shaderPath, shaderExt);
-  const GLchar * shaderFile = fileToString(shaderPath);
+GLint compileShader(GLuint shader, const char *shaderBuffer) {
   GLint success;
-  GLchar infoLog[512];
-
-  glShaderSource(shader, 1, &shaderFile, NULL);
-  free((void *)shaderFile);
+  glShaderSource(shader, 1, &shaderBuffer, NULL);
+  free((void *)shaderBuffer);
   glCompileShader(shader);
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-  if (!success)
-  {
-    glGetShaderInfoLog(shader, 512, NULL, infoLog);
-    fprintf(stderr, "'%s' compilation failed: %s\n", shaderPath, infoLog);
-  }
-}
-
-GLuint loadVertexShader(const char *vertexName) {
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  loadShader(vertexShader, vertexName, ".vert");
-  return vertexShader;
-}
-
-GLuint loadGeometryShader(const char *geometryName) {
-  GLuint geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-  loadShader(geometryShader, geometryName, ".geom");
-  return geometryShader;
-}
-
-GLuint loadFragmentShader(const char *fragmentName) {
-  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  loadShader(fragmentShader, fragmentName, ".frag");
-  return fragmentShader;
+  return success;
 }
 
 void linkProgram(GLuint program) {
@@ -52,33 +23,65 @@ void linkProgram(GLuint program) {
   }
 }
 
-GLuint loadShadersFV(const char *shaderName) {
-  GLuint vertexShader = loadVertexShader(shaderName);
-  GLuint fragmentShader = loadFragmentShader(shaderName);
-
+GLuint loadShaders(const char *shaderName, unsigned int numDirLights, unsigned int numPointLights) {
+  GLchar infoLog[512];
   GLuint program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, fragmentShader);
+  GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint geomShader = glCreateShader(GL_GEOMETRY_SHADER);
+  GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+  char *vertShaderPath;
+  asprintf(&vertShaderPath, "%s%s%s", shaderDir, shaderName, ".vert");
+  if (fileExists(vertShaderPath)) {
+    char *vertShaderBuffer;
+    const char *preVertShaderBuffer = fileToChars(vertShaderPath);
+    asprintf(&vertShaderBuffer, preVertShaderBuffer, numDirLights, numPointLights);
+    free((void *)preVertShaderBuffer);
+
+    if (!compileShader(vertShader, vertShaderBuffer)) {
+      glGetShaderInfoLog(vertShader, 512, NULL, infoLog);
+      fprintf(stderr, "'%s' compilation failed: %s\n", vertShaderPath, infoLog);
+    } else {
+      glAttachShader(program, vertShader);
+    }
+    free(vertShaderBuffer);
+  }
+  free(vertShaderPath);
+
+  char *geomShaderPath;
+  asprintf(&geomShaderPath, "%s%s%s", shaderDir, shaderName, ".geom");
+  if (fileExists(geomShaderPath)) {
+    const char *geomShaderBuffer = fileToChars(geomShaderPath);
+
+    if (!compileShader(geomShader, geomShaderBuffer)) {
+      glGetShaderInfoLog(geomShader, 512, NULL, infoLog);
+      fprintf(stderr, "'%s' compilation failed: %s\n", geomShaderPath, infoLog);
+    } else {
+      glAttachShader(program, geomShader);
+    }
+    free((void *)geomShaderBuffer);
+  }
+  free(geomShaderPath);
+
+  char *fragShaderPath;
+  asprintf(&fragShaderPath, "%s%s%s", shaderDir, shaderName, ".frag");
+  if (fileExists(fragShaderPath)) {
+    const char *fragShaderBuffer = fileToChars(fragShaderPath);
+
+    if (!compileShader(fragShader, fragShaderBuffer)) {
+      glGetShaderInfoLog(fragShader, 512, NULL, infoLog);
+      fprintf(stderr, "'%s' compilation failed: %s\n", fragShaderPath, infoLog);
+    } else {
+      glAttachShader(program, fragShader);
+    }
+    free((void *)fragShaderBuffer);
+  }
+  free(fragShaderPath);
+
   linkProgram(program);
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  return program;
-}
-
-GLuint loadShadersFGV(const char *shaderName) {
-  GLuint vertexShader = loadVertexShader(shaderName);
-  GLuint geometryShader = loadGeometryShader(shaderName);
-  GLuint fragmentShader = loadFragmentShader(shaderName);
-
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, geometryShader);
-  glAttachShader(program, fragmentShader);
-  linkProgram(program);
-  glDeleteShader(vertexShader);
-  glDeleteShader(geometryShader);
-  glDeleteShader(fragmentShader);
+  glDeleteShader(vertShader);
+  glDeleteShader(geomShader);
+  glDeleteShader(fragShader);
 
   return program;
 }

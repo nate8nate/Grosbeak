@@ -41,20 +41,20 @@ int main(void) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
 
-  GLuint lightingSP = loadShadersFV("gouraud");
-//  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
-//  GLuint lightingSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
-  GLuint normalSP = loadShadersFGV("normal");
-  GLuint lightObjectSP = loadShadersFV("shadeless");
+//   GLuint lightingSP = loadShadersFV("gouraud");
+// //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
+// //  GLuint lightingSP = loadShaders("shaders/shadeless.vert", "shaders/shadeless.frag");
+//   GLuint normalSP = loadShadersFGV("normal");
+//   GLuint lightObjectSP = loadShadersFV("shadeless");
 
-  GLint matAmbientLoc = glGetUniformLocation(lightingSP, "material.ambient");
-  GLint matDiffuseLoc = glGetUniformLocation(lightingSP, "material.diffuse");
-  GLint matSpecularLoc = glGetUniformLocation(lightingSP, "material.specular");
-  GLint matShineLoc = glGetUniformLocation(lightingSP, "material.shininess");
+  // GLint matAmbientLoc = glGetUniformLocation(lightingSP, "material.ambient");
+  // GLint matDiffuseLoc = glGetUniformLocation(lightingSP, "material.diffuse");
+  // GLint matSpecularLoc = glGetUniformLocation(lightingSP, "material.specular");
+  // GLint matShineLoc = glGetUniformLocation(lightingSP, "material.shininess");
 
-  GLint lightAmbientLoc = glGetUniformLocation(lightingSP, "light.ambient");
-  GLint lightDiffuseLoc = glGetUniformLocation(lightingSP, "light.diffuse");
-  GLint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
+  // GLint lightAmbientLoc = glGetUniformLocation(lightingSP, "light.ambient");
+  // GLint lightDiffuseLoc = glGetUniformLocation(lightingSP, "light.diffuse");
+  // GLint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
 
   scene s = loadScene("Scene");
 
@@ -204,65 +204,65 @@ int main(void) {
     view = translation(-cameraPos) * lookAt(cameraPos, cameraTarget, cameraUp);
     projection = perspective(fov, (float)width/height, 0.1f, 100.0f);
 
-    glClearColor(.4f, .4f, .4f, 1.f);
+    glClearColor(s.skyColor.r, s.skyColor.g, s.skyColor.b, 1.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(lightingSP);
+    glUseProgram(s.matShader.ID);
 
     // Directional light
-    glUniform3f(glGetUniformLocation(lightingSP, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-    glUniform3f(glGetUniformLocation(lightingSP, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
-    glUniform3f(glGetUniformLocation(lightingSP, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
-    glUniform3f(glGetUniformLocation(lightingSP, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
-    // Point light 1
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].constant"), 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].linear"), 0.09);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].quadratic"), 0.032);
-    // Point light 2
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].constant"), 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].linear"), 0.09);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].quadratic"), 0.032);
-    // Point light 3
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].constant"), 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].linear"), 0.09);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].quadratic"), 0.032);
-    // Point light 4
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
-    glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].constant"), 1.0f);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].linear"), 0.09);
-    glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].quadratic"), 0.032);
+    // glUniform3f(glGetUniformLocation(lightingSP, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "dirLight.ambient"), 0.05f, 0.05f, 0.05f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+    // // Point light 1
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].diffuse"), 0.8f, 0.8f, 0.8f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].constant"), 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].linear"), 0.09);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[0].quadratic"), 0.032);
+    // // Point light 2
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].diffuse"), 0.8f, 0.8f, 0.8f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].constant"), 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].linear"), 0.09);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[1].quadratic"), 0.032);
+    // // Point light 3
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].ambient"), 0.05f, 0.05f, 0.05f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].diffuse"), 0.8f, 0.8f, 0.8f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[2].specular"), 1.0f, 1.0f, 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].constant"), 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].linear"), 0.09);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[2].quadratic"), 0.032);
+    // // Point light 4
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].position"), pointLightPositions[3].x, pointLightPositions[3].y, pointLightPositions[3].z);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].ambient"), 0.05f, 0.05f, 0.05f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].diffuse"), 0.8f, 0.8f, 0.8f);
+    // glUniform3f(glGetUniformLocation(lightingSP, "pointLights[3].specular"), 1.0f, 1.0f, 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].constant"), 1.0f);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].linear"), 0.09);
+    // glUniform1f(glGetUniformLocation(lightingSP, "pointLights[3].quadratic"), 0.032);
 
-    GLint cameraPosLoc = glGetUniformLocation(lightingSP, "viewPos");
-    glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
-
-    GLint modelLoc = glGetUniformLocation(lightingSP, "model");
-    GLint normalMatrixLoc = glGetUniformLocation(lightingSP, "normalMatrix");
-    GLint viewLoc = glGetUniformLocation(lightingSP, "view");
-    GLint projectionLoc = glGetUniformLocation(lightingSP, "projection");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view.flat);
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection.flat);
-    glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
-    glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
-    glUniform3f(matSpecularLoc, 0.1f, 0.1f, 0.1f);
-    glUniform1f(matShineLoc, 8.0f);
-    glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
-    glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
-    glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+    // GLint cameraPosLoc = glGetUniformLocation(lightingSP, "viewPos");
+    // glUniform3f(cameraPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+    //
+    // GLint modelLoc = glGetUniformLocation(lightingSP, "model");
+    // GLint normalMatrixLoc = glGetUniformLocation(lightingSP, "normalMatrix");
+    // GLint viewLoc = glGetUniformLocation(lightingSP, "view");
+    // GLint projectionLoc = glGetUniformLocation(lightingSP, "projection");
+    // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view.flat);
+    // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection.flat);
+    // glUniform3f(matAmbientLoc, 1.0f, 0.5f, 0.31f);
+    // glUniform3f(matDiffuseLoc, 1.0f, 0.5f, 0.31f);
+    // glUniform3f(matSpecularLoc, 0.1f, 0.1f, 0.1f);
+    // glUniform1f(matShineLoc, 8.0f);
+    // glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
+    // glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
+    // glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
 
     glBindVertexArray(VAO);
     mat4 normalMatrix;
@@ -307,14 +307,14 @@ int main(void) {
     SDL_GL_SwapWindow(window);
   }
 
-  destroyEntity(e);
-
-  glDeleteProgram(lightingSP);
-  glDeleteProgram(lightObjectSP);
-
-  glDeleteBuffers(1, &EBO);
-  glDeleteBuffers(1, &VBO);
-  glDeleteVertexArrays(1, &VAO);
+  // destroyEntity(e);
+  //
+  // glDeleteProgram(lightingSP);
+  // glDeleteProgram(lightObjectSP);
+  //
+  // glDeleteBuffers(1, &EBO);
+  // glDeleteBuffers(1, &VBO);
+  // glDeleteVertexArrays(1, &VAO);
 
   SDL_GL_DeleteContext(glcontext);
   SDL_DestroyWindow(window);

@@ -1,6 +1,6 @@
 #include "io.hpp"
 
-const char * fileToString(const char *filepath)
+const char * fileToChars(const char *filepath)
 {
   char *result = 0;
 
@@ -14,7 +14,7 @@ const char * fileToString(const char *filepath)
     result = (char *)malloc(size+1);
     fread(result, size, 1, file);
     result[size] = '\0';
-    
+
     fclose(file);
   }
 

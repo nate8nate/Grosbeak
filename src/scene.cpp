@@ -13,11 +13,10 @@ void drawScene(scene s) {
 }
 
 scene loadScene(const char *sceneName) {
-  char scenePath[128];
-  strcpy(scenePath, sceneDir);
-  strcat(scenePath, sceneName);
-  strcat(scenePath, sceneExt);
+  char *scenePath;
+  asprintf(&scenePath, "%s%s%s", sceneDir, sceneName, sceneExt);
   FILE * sceneFile = fopen(scenePath, "r");
+  free(scenePath);
   scene s;
 
   unsigned int numSceneVertices = 0;
@@ -26,99 +25,76 @@ scene loadScene(const char *sceneName) {
   fscanf(sceneFile, "%u", &s.numMeshes);
   s.meshes = (mesh *)malloc(s.numMeshes * sizeof(mesh));
   for (unsigned int m=0; m<s.numMeshes; m++) {
+    mesh msh;
+
     char meshName[64];
     fscanf(sceneFile, " %64s", meshName);
-
-    char meshPath[128];
-    strcpy(meshPath, meshDir);
-    strcat(meshPath, meshName);
-    strcat(meshPath, meshExt);
+    char *meshPath;
+    asprintf(&meshPath, "%s%s%s", meshDir, meshName, meshExt);
     FILE *meshFile = fopen(meshPath, "r");
+    free(meshPath);
 
-    fscanf(meshFile, "%u", &s.meshes[m].numVertices);
-    s.meshes[m].vertices = (vertex *)malloc(s.meshes[m].numVertices * sizeof(vertex));
-    for (unsigned int v=0; v<s.meshes[m].numVertices; v++) {
+    fscanf(meshFile, "%u", &msh.numVertices);
+    msh.vertices = (vertex *)malloc(msh.numVertices * sizeof(vertex));
+    for (unsigned int v=0; v<msh.numVertices; v++) {
+      vertex vert;
       fscanf(meshFile, "%f,%f,%f\t%f,%f,%f\t%f,%f,%f",
-                        &s.meshes[m].vertices[v].position.x,
-                        &s.meshes[m].vertices[v].position.y,
-                        &s.meshes[m].vertices[v].position.z,
-                        &s.meshes[m].vertices[v].normal.x,
-                        &s.meshes[m].vertices[v].normal.y,
-                        &s.meshes[m].vertices[v].normal.z,
-                        &s.meshes[m].vertices[v].color.r,
-                        &s.meshes[m].vertices[v].color.g,
-                        &s.meshes[m].vertices[v].color.b);
+                        &vert.position.x, &vert.position.y, &vert.position.z,
+                        &vert.normal.x, &vert.normal.y, &vert.normal.z,
+                        &vert.color.r, &vert.color.g, &vert.color.b);
+      msh.vertices[v] = vert;
     }
-    fscanf(meshFile, "%u", &s.meshes[m].numVertexIndices);
-    s.meshes[m].vertexIndices = (unsigned short *)malloc(s.meshes[m].numVertexIndices * sizeof(short));
-    for (unsigned int i=0; i<s.meshes[m].numVertexIndices; i=i+3) {
+    fscanf(meshFile, "%u", &msh.numVertexIndices);
+    msh.vertexIndices = (unsigned short *)malloc(msh.numVertexIndices * sizeof(short));
+    for (unsigned int i=0; i<msh.numVertexIndices; i=i+3) {
       fscanf(meshFile, "%hu\t%hu\t%hu",
-                        &s.meshes[m].vertexIndices[i],
-                        &s.meshes[m].vertexIndices[i+1],
-                        &s.meshes[m].vertexIndices[i+2]);
+                        &msh.vertexIndices[i],
+                        &msh.vertexIndices[i+1],
+                        &msh.vertexIndices[i+2]);
     }
 
-    numSceneVertices += s.meshes[m].numVertices;
-    numSceneVertexIndices += s.meshes[m].numVertexIndices;
+    numSceneVertices += msh.numVertices;
+    numSceneVertexIndices += msh.numVertexIndices;
 
     fclose(meshFile);
+    s.meshes[m] = msh;
   }
 
   fscanf(sceneFile, "%u", &s.numEntities);
   s.entities = (entity *)malloc(s.numEntities * sizeof(entity));
-  for (unsigned int e=0; e<s.numEntities; e++)
-  {
-    fscanf(sceneFile, "%u", &s.entities[e].meshIndex);
-    fscanf(sceneFile, "%f,%f,%f",
-                        &s.entities[e].location.x,
-                        &s.entities[e].location.y,
-                        &s.entities[e].location.z);
-    fscanf(sceneFile, "%f,%f,%f,%f",
-                        &s.entities[e].rotation.r,
-                        &s.entities[e].rotation.i,
-                        &s.entities[e].rotation.j,
-                        &s.entities[e].rotation.k);
-    fscanf(sceneFile, "%f,%f,%f",
-                        &s.entities[e].scale.x,
-                        &s.entities[e].scale.y,
-                        &s.entities[e].scale.z);
+  for (unsigned int e=0; e<s.numEntities; e++) {
+    entity ent;
+    fscanf(sceneFile, "%u", &ent.meshIndex);
+    fscanf(sceneFile, "%f,%f,%f", &ent.location.x, &ent.location.y, &ent.location.z);
+    fscanf(sceneFile, "%f,%f,%f,%f", &ent.rotation.r, &ent.rotation.i, &ent.rotation.j, &ent.rotation.k);
+    fscanf(sceneFile, "%f,%f,%f", &ent.scale.x, &ent.scale.y, &ent.scale.z);
+    s.entities[e] = ent;
   }
 
   fscanf(sceneFile, "%u", &s.numDirLights);
-  s.dirLights = (dirLight *)malloc(s.numDirLights * sizeof(dirLight));
-  for (unsigned int d=0; d<s.numDirLights; d++)
-  {
-    fscanf(sceneFile, "%f,%f,%f",
-                          &s.dirLights[d].direction.x,
-                          &s.dirLights[d].direction.y,
-                          &s.dirLights[d].direction.z);
-    fscanf(sceneFile, "%f,%f,%f",
-                          &s.dirLights[d].diffuse.r,
-                          &s.dirLights[d].diffuse.g,
-                          &s.dirLights[d].diffuse.b);
+  s.dirLights = (directionalLight *)malloc(s.numDirLights * sizeof(directionalLight));
+  for (unsigned int d=0; d<s.numDirLights; d++) {
+    directionalLight dir;
+    fscanf(sceneFile, "%f,%f,%f", &dir.direction.x, &dir.direction.y, &dir.direction.z);
+    fscanf(sceneFile, "%f,%f,%f", &dir.diffuse.r, &dir.diffuse.g, &dir.diffuse.b);
+    s.dirLights[d] = dir;
   }
 
   fscanf(sceneFile, "%u", &s.numPointLights);
   s.pointLights = (pointLight *)malloc(s.numPointLights * sizeof(pointLight));
   for (unsigned int p=0; p<s.numPointLights; p++)
   {
-    fscanf(sceneFile, "%f,%f,%f",
-                            &s.pointLights[p].location.x,
-                            &s.pointLights[p].location.y,
-                            &s.pointLights[p].location.z);
-    fscanf(sceneFile, "%f", &s.pointLights[p].constant);
-    fscanf(sceneFile, "%f", &s.pointLights[p].linear);
-    fscanf(sceneFile, "%f", &s.pointLights[p].quadratic);
-    fscanf(sceneFile, "%f,%f,%f",
-                            &s.pointLights[p].diffuse.r,
-                            &s.pointLights[p].diffuse.g,
-                            &s.pointLights[p].diffuse.b);
+    pointLight point;
+    fscanf(sceneFile, "%f,%f,%f", &point.location.x, &point.location.y, &point.location.z);
+    fscanf(sceneFile, "%f", &point.constant);
+    fscanf(sceneFile, "%f", &point.linear);
+    fscanf(sceneFile, "%f", &point.quadratic);
+    fscanf(sceneFile, "%f,%f,%f", &point.diffuse.r, &point.diffuse.g, &point.diffuse.b);
+    s.pointLights[p] = point;
   }
 
-  fscanf(sceneFile, "%f,%f,%f",
-                    &s.ambientColor.r,
-                    &s.ambientColor.g,
-                    &s.ambientColor.b);
+  fscanf(sceneFile, "%f,%f,%f", &s.skyColor.r, &s.skyColor.g, &s.skyColor.b);
+  fscanf(sceneFile, "%f,%f,%f", &s.ambientColor.r, &s.ambientColor.g, &s.ambientColor.b);
 
   fclose(sceneFile);
 
@@ -160,5 +136,80 @@ scene loadScene(const char *sceneName) {
   free(sceneVertices);
   free(sceneVertexIndices);
 
+  {
+    materialShader m;
+
+    char locString[32];
+
+    m.ID = loadShaders("gouraud", s.numDirLights, s.numPointLights);
+
+    m.viewPosLoc = glGetUniformLocation(m.ID, "viewPos");
+    m.modelLoc = glGetUniformLocation(m.ID, "model");
+    m.normalMatrixLoc = glGetUniformLocation(m.ID, "normalMatrix");
+    m.viewLoc = glGetUniformLocation(m.ID, "view");
+    m.projectionLoc = glGetUniformLocation(m.ID, "projection");
+
+    m.worldAmbient = glGetUniformLocation(m.ID, "worldAmbient");
+    m.matDiffuseLoc = glGetUniformLocation(m.ID, "material.diffuse");
+    m.matSpecularLoc = glGetUniformLocation(m.ID, "material.specular");
+    m.matShininessLoc = glGetUniformLocation(m.ID, "material.shininess");
+
+    m.dirLightDirectionLocs = (GLint *)malloc(s.numDirLights * sizeof(GLint));
+    m.dirLightDiffuseLocs = (GLint *)malloc(s.numDirLights * sizeof(GLint));
+    for (unsigned int d = 0; d<s.numDirLights; d++) {
+      sprintf(locString, "dirlights[%i].direction", d);
+      m.dirLightDirectionLocs[d] = glGetUniformLocation(m.ID, locString);
+      sprintf(locString, "dirlights[%i].diffuse", d);
+      m.dirLightDiffuseLocs[d] = glGetUniformLocation(m.ID, locString);
+    }
+
+    m.pointLightLocationLocs = (GLint *)malloc(s.numPointLights * sizeof(GLint));
+    m.pointLightDiffuseLocs = (GLint *)malloc(s.numPointLights * sizeof(GLint));
+    m.pointLightConstantLocs = (GLint *)malloc(s.numPointLights * sizeof(GLint));
+    m.pointLightLinearLocs = (GLint *)malloc(s.numPointLights * sizeof(GLint));
+    m.pointLightQuadraticLocs = (GLint *)malloc(s.numPointLights * sizeof(GLint));
+    for (unsigned int p = 0; p<s.numPointLights; p++) {
+      sprintf(locString, "pointLights[%i].location", p);
+      m.pointLightLocationLocs[p] = glGetUniformLocation(m.ID, locString);
+      sprintf(locString, "pointLights[%i].diffuse", p);
+      m.pointLightDiffuseLocs[p] = glGetUniformLocation(m.ID, locString);
+      sprintf(locString, "pointLights[%i].constant", p);
+      m.pointLightConstantLocs[p] = glGetUniformLocation(m.ID, locString);
+      sprintf(locString, "pointLights[%i].linear", p);
+      m.pointLightLinearLocs[p] = glGetUniformLocation(m.ID, locString);
+      sprintf(locString, "pointLights[%i].quadratic", p);
+      m.pointLightQuadraticLocs[p] = glGetUniformLocation(m.ID, locString);
+    }
+
+    s.matShader = m;
+  }
+
   return s;
+}
+
+void deleteScene(scene s) {
+  glDeleteProgram(s.matShader.ID);
+
+  glDeleteBuffers(1, &s.EBO);
+  glDeleteBuffers(1, &s.VBO);
+  glDeleteVertexArrays(1, &s.VAO);
+
+  for (unsigned int m=0; m<s.numMeshes; m++) {
+    free(s.meshes[m].vertices);
+    free(s.meshes[m].vertexIndices);
+  }
+
+  free(s.matShader.dirLightDirectionLocs);
+  free(s.matShader.dirLightDiffuseLocs);
+
+  free(s.matShader.pointLightLocationLocs);
+  free(s.matShader.pointLightDiffuseLocs);
+  free(s.matShader.pointLightConstantLocs);
+  free(s.matShader.pointLightLinearLocs);
+  free(s.matShader.pointLightQuadraticLocs);
+
+  free(s.meshes);
+  free(s.entities);
+  free(s.dirLights);
+  free(s.pointLights);
 }

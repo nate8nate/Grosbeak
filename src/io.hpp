@@ -4,6 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char * fileToString(const char * filepath);
+const char * fileToChars(const char *filepath);
 
 #endif

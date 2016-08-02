@@ -94,7 +94,9 @@ class ExportScene(bpy.types.Operator, ExportHelper):
             for p in pointlist:
                 scenefile.write("\t%s\n" % p)
 
-            scenefile.write('%f,%f,%f\n' % (s.world.ambient_color.r, s.world.ambient_color.g, s.world.ambient_color.b))
+            scenefile.write("%f,%f,%f\n" % (s.world.horizon_color.r, s.world.horizon_color.g, s.world.horizon_color.b))
+
+            scenefile.write("%f,%f,%f\n" % (s.world.ambient_color.r, s.world.ambient_color.g, s.world.ambient_color.b))
 
             scenefile.close()
 
@@ -115,5 +117,5 @@ def unregister():
 if __name__ == "__main__":
     register()
 
-    # test call
-    bpy.ops.export_scene.scene('INVOKE_DEFAULT')
+    # # test call
+    # bpy.ops.export_scene.scene('INVOKE_DEFAULT')
