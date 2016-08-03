@@ -39,7 +39,7 @@ int main(void) {
 
   glViewport(0,0, width, height);
   glEnable(GL_DEPTH_TEST);
-  // glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 
 //   GLuint lightingSP = loadShadersFV("gouraud");
 // //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");

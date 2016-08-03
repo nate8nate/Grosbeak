@@ -28,7 +28,7 @@ void drawScene(scene s, player p, mat4 projection) {
   }
 
   glUniform3fv(s.matShader.viewPosLoc, 1, p.location.A);
-  mat4 view = translation(-p.location) * lookAt(p.location, p.location + p.heading, Vec3(0.f, 1.f, 0.f));
+  mat4 view = translation(-p.location) * lookAt(p.location, p.location + p.heading, p.up);
   glUniformMatrix4fv(s.matShader.viewLoc, 1, GL_FALSE, view.A);
   glUniformMatrix4fv(s.matShader.projectionLoc, 1, GL_FALSE, projection.A);
 
