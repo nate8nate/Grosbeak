@@ -30,10 +30,10 @@ GLuint loadShaders(const char *shaderName, unsigned int numDirLights, unsigned i
   GLuint geomShader = glCreateShader(GL_GEOMETRY_SHADER);
   GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-  char *vertShaderPath;
+  char *vertShaderPath = NULL;
   asprintf(&vertShaderPath, "%s%s%s", shaderDir, shaderName, ".vert");
   if (fileExists(vertShaderPath)) {
-    char *vertShaderBuffer;
+    char *vertShaderBuffer = NULL;
     const char *preVertShaderBuffer = fileToChars(vertShaderPath);
     asprintf(&vertShaderBuffer, preVertShaderBuffer, numDirLights, numPointLights);
     free((void *)preVertShaderBuffer);
@@ -44,11 +44,11 @@ GLuint loadShaders(const char *shaderName, unsigned int numDirLights, unsigned i
     } else {
       glAttachShader(program, vertShader);
     }
-    free(vertShaderBuffer);
+    // free((void *)vertShaderBuffer);
   }
-  free(vertShaderPath);
+  free((void *)vertShaderPath);
 
-  char *geomShaderPath;
+  char *geomShaderPath = NULL;
   asprintf(&geomShaderPath, "%s%s%s", shaderDir, shaderName, ".geom");
   if (fileExists(geomShaderPath)) {
     const char *geomShaderBuffer = fileToChars(geomShaderPath);
@@ -59,11 +59,11 @@ GLuint loadShaders(const char *shaderName, unsigned int numDirLights, unsigned i
     } else {
       glAttachShader(program, geomShader);
     }
-    free((void *)geomShaderBuffer);
+    // free((void *)geomShaderBuffer);
   }
-  free(geomShaderPath);
+  free((void *)geomShaderPath);
 
-  char *fragShaderPath;
+  char *fragShaderPath = NULL;
   asprintf(&fragShaderPath, "%s%s%s", shaderDir, shaderName, ".frag");
   if (fileExists(fragShaderPath)) {
     const char *fragShaderBuffer = fileToChars(fragShaderPath);
@@ -74,9 +74,9 @@ GLuint loadShaders(const char *shaderName, unsigned int numDirLights, unsigned i
     } else {
       glAttachShader(program, fragShader);
     }
-    free((void *)fragShaderBuffer);
+    // free((void *)fragShaderBuffer);
   }
-  free(fragShaderPath);
+  free((void *)fragShaderPath);
 
   linkProgram(program);
   glDeleteShader(vertShader);

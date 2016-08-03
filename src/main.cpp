@@ -39,7 +39,7 @@ int main(void) {
 
   glViewport(0,0, width, height);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
+  // glEnable(GL_CULL_FACE);
 
 //   GLuint lightingSP = loadShadersFV("gouraud");
 // //  GLuint lightingSP = loadShaders("shaders/flat.vert", "shaders/flat.frag");
@@ -57,6 +57,14 @@ int main(void) {
   // GLint lightSpecularLoc = glGetUniformLocation(lightingSP, "light.specular");
 
   scene s = loadScene("Scene");
+
+  player p;
+  p.location = Vec3(0.f, 0.f, 0.f);
+  p.heading = Vec3(0.f, 0.f, -1.f);
+  p.up = Vec3(0.f, 1.f, 0.f);
+
+  float fov = 45.0f;
+  float pitch = 0.0f, yaw = 0.0f;
 
   // GLuint VAO;
   // glGenVertexArrays(1, &VAO);
@@ -92,16 +100,9 @@ int main(void) {
 //  glEnableVertexAttribArray(0);
 //  glBindVertexArray(0);
 
-  mat4 model;
-  mat4 view;
-  mat4 projection;
-  vec3 cameraPos = Vec3(0.0f, 0.0f, -3.0f);
-  vec3 cameraTarget = Vec3(0.0f, 0.0f, 0.0f);
-  vec3 cameraFront = Vec3(0.0f, 0.0f,-1.0f);
-  vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
-  vec3 cameraRight = Vec3(-1.0f, 0.0f, 0.0f);
-  float pitch = 0.0f, yaw = 0.0f;
-  float fov = 45.0f;
+  // mat4 model;
+  // mat4 view;
+  // mat4 projection;
 
   SDL_Event event;
   Uint32 last=0, dt=0;
@@ -158,9 +159,17 @@ int main(void) {
       pitch = -M_PI/2.1f;
     }
 
-    cameraFront.x = cosf(pitch) * cosf(yaw);
-    cameraFront.y = sinf(pitch);
-    cameraFront.z = cosf(pitch) * sinf(yaw);
+    // vec3 cameraPos = Vec3(0.0f, 0.0f, -3.0f);
+    // vec3 cameraFront = Vec3(0.0f, 0.0f,-1.0f);
+    // vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
+    // vec3 cameraRight = normalize( cross(cameraFront, cameraUp));
+
+    // cameraFront.x = cosf(pitch) * cosf(yaw);
+    // cameraFront.y = sinf(pitch);
+    // cameraFront.z = cosf(pitch) * sinf(yaw);
+
+    p.heading = Vec3(cosf(pitch) * cosf(yaw), sinf(pitch), cosf(pitch) * sinf(yaw));
+    vec3 playerRight = normalize( cross(p.heading, p.up));
 
     if (keyboardState[SDL_SCANCODE_ESCAPE]) {
       SDL_Event quit;
@@ -173,20 +182,20 @@ int main(void) {
       velocityMultiplier = 5.0f;
     }
     if (keyboardState[SDL_SCANCODE_W]) {
-      vec3 dLoc = (dts*velocityMultiplier) * cameraFront;
-      cameraPos = cameraPos + dLoc;
+      vec3 dLoc = (dts*velocityMultiplier) * p.heading;
+      p.location = p.location + dLoc;
     }
     if (keyboardState[SDL_SCANCODE_S]) {
-      vec3 dLoc = (dts*velocityMultiplier) * cameraFront;
-      cameraPos = cameraPos - dLoc;
+      vec3 dLoc = (dts*velocityMultiplier) * p.heading;
+      p.location = p.location - dLoc;
     }
     if (keyboardState[SDL_SCANCODE_A]) {
-      vec3 dLoc = (dts*velocityMultiplier) * cameraRight;
-      cameraPos = cameraPos - dLoc;
+      vec3 dLoc = (dts*velocityMultiplier) * playerRight;
+      p.location = p.location - dLoc;
     }
     if (keyboardState[SDL_SCANCODE_D]) {
-      vec3 dLoc = (dts*velocityMultiplier) * cameraRight;
-      cameraPos = cameraPos + dLoc;
+      vec3 dLoc = (dts*velocityMultiplier) * playerRight;
+      p.location = p.location + dLoc;
     }
 
     fov -= (float)mouseWheeldy/100.0f;
@@ -197,17 +206,16 @@ int main(void) {
       fov = M_PI_2;
     }
 
-    cameraRight = cross(cameraFront, cameraUp);
-    cameraRight = normalize(cameraRight);
+    // cameraTarget = cameraPos + cameraFront;
+    // view = translation(-cameraPos) * lookAt(cameraPos, cameraTarget, cameraUp);
 
-    cameraTarget = cameraPos + cameraFront;
-    view = translation(-cameraPos) * lookAt(cameraPos, cameraTarget, cameraUp);
-    projection = perspective(fov, (float)width/height, 0.1f, 100.0f);
-
-    glClearColor(s.skyColor.r, s.skyColor.g, s.skyColor.b, 1.f);
+    glClearColor(s.sky.r, s.sky.g, s.sky.b, 1.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(s.matShader.ID);
+    mat4 projection = perspective(fov, (float)width/height, 0.1f, 100.0f);
+    drawScene(s, p, projection);
+
+    // glUseProgram(s.matShader.ID);
 
     // Directional light
     // glUniform3f(glGetUniformLocation(lightingSP, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
@@ -264,45 +272,45 @@ int main(void) {
     // glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
     // glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
 
-    glBindVertexArray(VAO);
-    mat4 normalMatrix;
-    model = translation(d.location);
-    model = rotate(model, d.rotation);
-    model = scale(model, d.scale);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
-    normalMatrix = transpose(inverse(model));
-    glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
-    glDrawElements(GL_TRIANGLES, d.mesh.numIndices, GL_UNSIGNED_SHORT, (void *)0);
-    glBindVertexArray(0);
-
-    glBindVertexArray(VAO);
-    glUseProgram(normalSP);
-    modelLoc = glGetUniformLocation(normalSP, "model");
-    normalMatrixLoc = glGetUniformLocation(normalSP, "normalMatrix");
-    viewLoc = glGetUniformLocation(normalSP, "view");
-    projectionLoc = glGetUniformLocation(normalSP, "projection");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
-    glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.flat);
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.flat);
-    glDrawElements(GL_POINTS, d.mesh.numIndices, GL_UNSIGNED_SHORT, 0);
-    glBindVertexArray(0);
-
-    glUseProgram(lightObjectSP);
-    modelLoc = glGetUniformLocation(lightObjectSP, "model");
-    viewLoc = glGetUniformLocation(lightObjectSP, "view");
-    projectionLoc = glGetUniformLocation(lightObjectSP, "projection");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view.flat);
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection.flat);
-
-    glBindVertexArray(VAO);
-    for (GLuint i=0; i<4; ++i) {
-      model = translation(pointLightPositions[i]);
-      model = scale(model, .2f);
-      glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model.flat);
-      glDrawElements(GL_TRIANGLES, d.mesh.numIndices, GL_UNSIGNED_SHORT, (void *)0);
-    }
-    glBindVertexArray(0);
+    // glBindVertexArray(VAO);
+    // mat4 normalMatrix;
+    // model = translation(d.location);
+    // model = rotate(model, d.rotation);
+    // model = scale(model, d.scale);
+    // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
+    // normalMatrix = transpose(inverse(model));
+    // glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
+    // glDrawElements(GL_TRIANGLES, d.mesh.numIndices, GL_UNSIGNED_SHORT, (void *)0);
+    // glBindVertexArray(0);
+    //
+    // glBindVertexArray(VAO);
+    // glUseProgram(normalSP);
+    // modelLoc = glGetUniformLocation(normalSP, "model");
+    // normalMatrixLoc = glGetUniformLocation(normalSP, "normalMatrix");
+    // viewLoc = glGetUniformLocation(normalSP, "view");
+    // projectionLoc = glGetUniformLocation(normalSP, "projection");
+    // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.flat);
+    // glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, normalMatrix.flat);
+    // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.flat);
+    // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.flat);
+    // glDrawElements(GL_POINTS, d.mesh.numIndices, GL_UNSIGNED_SHORT, 0);
+    // glBindVertexArray(0);
+    //
+    // glUseProgram(lightObjectSP);
+    // modelLoc = glGetUniformLocation(lightObjectSP, "model");
+    // viewLoc = glGetUniformLocation(lightObjectSP, "view");
+    // projectionLoc = glGetUniformLocation(lightObjectSP, "projection");
+    // glUniformMatrix4fv(viewLoc, 1, GL_FALSE, (GLfloat *)view.flat);
+    // glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, (GLfloat *)projection.flat);
+    //
+    // glBindVertexArray(VAO);
+    // for (GLuint i=0; i<4; ++i) {
+    //   model = translation(pointLightPositions[i]);
+    //   model = scale(model, .2f);
+    //   glUniformMatrix4fv(modelLoc, 1, GL_FALSE, (GLfloat *)model.flat);
+    //   glDrawElements(GL_TRIANGLES, d.mesh.numIndices, GL_UNSIGNED_SHORT, (void *)0);
+    // }
+    // glBindVertexArray(0);
 
     SDL_GL_SwapWindow(window);
   }
@@ -315,6 +323,7 @@ int main(void) {
   // glDeleteBuffers(1, &EBO);
   // glDeleteBuffers(1, &VBO);
   // glDeleteVertexArrays(1, &VAO);
+  deleteScene(s);
 
   SDL_GL_DeleteContext(glcontext);
   SDL_DestroyWindow(window);

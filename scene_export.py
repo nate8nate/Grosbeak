@@ -45,7 +45,7 @@ class ExportScene(bpy.types.Operator, ExportHelper):
                                 for _ in mesh.vertices:
                                     colors.append([1,0,1])
 
-                            meshfile.write("%i\n" % (len(mesh.vertices)/9))
+                            meshfile.write("%i\n" % len(mesh.vertices))
                             for i,v in enumerate(mesh.vertices):
                                 meshfile.write("\t%f,%f,%f\t%f,%f,%f\t%f,%f,%f\n" % (-v.co.x,v.co.z,v.co.y, -v.normal.x,v.normal.z,v.normal.y, colors[i][0],colors[i][1],colors[i][2]))
 

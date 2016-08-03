@@ -7,6 +7,7 @@ struct player {
   vec3 location;
   vec3 heading;
   vec3 velocity;
+  vec3 up;
 };
 
 #endif

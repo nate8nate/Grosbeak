@@ -6,9 +6,41 @@ const char meshDir[] = "meshes/";
 const char sceneExt[] = ".scene";
 const char meshExt[] = ".mesh";
 
-void drawScene(scene s) {
-  for (unsigned int i=0; i<s.numEntities; ++i) {
-    // draw(s.entities[i]);
+void drawScene(scene s, player p, mat4 projection) {
+  glUseProgram(s.matShader.ID);
+
+  glUniform3f(s.matShader.worldAmbientLoc, s.ambient.r, s.ambient.g, s.ambient.b);
+  glUniform3f(s.matShader.matDiffuseLoc, .4f, .2f, .2f);
+  glUniform3f(s.matShader.matSpecularLoc, .2f, .5f, .1f);
+  glUniform1f(s.matShader.matHardnessLoc, 32);
+
+  // TODO preprocess values => arrays
+  for (unsigned int d=0; d<s.numDirLights; d++) {
+    glUniform3fv(s.matShader.dirLightDirectionLocs[d], 1, s.dirLights[d].direction.A);
+    glUniform3fv(s.matShader.dirLightDiffuseLocs[d], 1, s.dirLights[d].diffuse.A);
+  }
+  for (unsigned int p=0; p<s.numPointLights; p++) {
+    glUniform3fv(s.matShader.pointLightLocationLocs[p], 1, s.pointLights[p].location.A);
+    glUniform3fv(s.matShader.pointLightDiffuseLocs[p], 1, s.pointLights[p].diffuse.A);
+    glUniform1f(s.matShader.pointLightConstantLocs[p], s.pointLights[p].constant);
+    glUniform1f(s.matShader.pointLightLinearLocs[p], s.pointLights[p].linear);
+    glUniform1f(s.matShader.pointLightQuadraticLocs[p], s.pointLights[p].quadratic);
+  }
+
+  glUniform3fv(s.matShader.viewPosLoc, 1, p.location.A);
+  mat4 view = translation(-p.location) * lookAt(p.location, p.location + p.heading, Vec3(0.f, 1.f, 0.f));
+  glUniformMatrix4fv(s.matShader.viewLoc, 1, GL_FALSE, view.A);
+  glUniformMatrix4fv(s.matShader.projectionLoc, 1, GL_FALSE, projection.A);
+
+  for (unsigned int e=0; e<s.numEntities; e++) {
+    mat4 model = scale( rotate( translation(s.entities[e].location), s.entities[e].rotation), s.entities[e].scale);
+    mat4 normalMatrix = transpose( inverse(model));
+    glUniformMatrix4fv(s.matShader.modelLoc, 1, GL_FALSE, model.A);
+    glUniformMatrix4fv(s.matShader.normalMatrixLoc, 1, GL_FALSE, normalMatrix.A);
+
+    glBindVertexArray(s.VAO);
+    glDrawElements(GL_TRIANGLES, s.meshes[s.entities[e].meshIndex].numVertexIndices, GL_UNSIGNED_SHORT, NULL);
+    glBindVertexArray(0);
   }
 }
 
@@ -93,8 +125,8 @@ scene loadScene(const char *sceneName) {
     s.pointLights[p] = point;
   }
 
-  fscanf(sceneFile, "%f,%f,%f", &s.skyColor.r, &s.skyColor.g, &s.skyColor.b);
-  fscanf(sceneFile, "%f,%f,%f", &s.ambientColor.r, &s.ambientColor.g, &s.ambientColor.b);
+  fscanf(sceneFile, "%f,%f,%f", &s.sky.r, &s.sky.g, &s.sky.b);
+  fscanf(sceneFile, "%f,%f,%f", &s.ambient.r, &s.ambient.g, &s.ambient.b);
 
   fclose(sceneFile);
 
@@ -149,10 +181,10 @@ scene loadScene(const char *sceneName) {
     m.viewLoc = glGetUniformLocation(m.ID, "view");
     m.projectionLoc = glGetUniformLocation(m.ID, "projection");
 
-    m.worldAmbient = glGetUniformLocation(m.ID, "worldAmbient");
+    m.worldAmbientLoc = glGetUniformLocation(m.ID, "worldAmbient");
     m.matDiffuseLoc = glGetUniformLocation(m.ID, "material.diffuse");
     m.matSpecularLoc = glGetUniformLocation(m.ID, "material.specular");
-    m.matShininessLoc = glGetUniformLocation(m.ID, "material.shininess");
+    m.matHardnessLoc = glGetUniformLocation(m.ID, "material.hardness");
 
     m.dirLightDirectionLocs = (GLint *)malloc(s.numDirLights * sizeof(GLint));
     m.dirLightDiffuseLocs = (GLint *)malloc(s.numDirLights * sizeof(GLint));

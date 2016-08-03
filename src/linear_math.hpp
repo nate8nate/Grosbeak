@@ -163,8 +163,8 @@ static inline quat normalize(quat q) {
 }
 
 union mat4 {
+  float A[16];
   float CR[4][4];
-  float flat[16];
 };
 
 static inline mat4 Mat4(float aa, float ba, float ca, float da,
@@ -288,68 +288,68 @@ static inline mat4 transpose(mat4 m) {
 static inline mat4 inverse(mat4 m) {
   const mat4 t = transpose(m);
   const float pairs[24] = {
-    t.flat[10]*t.flat[15],
-    t.flat[11]*t.flat[14],
-    t.flat[9]*t.flat[15],
-    t.flat[11]*t.flat[13],
-    t.flat[9]*t.flat[14],
-    t.flat[10]*t.flat[13],
-    t.flat[8]*t.flat[15],
-    t.flat[11]*t.flat[12],
-    t.flat[8]*t.flat[14],
-    t.flat[10]*t.flat[12],
-    t.flat[8]*t.flat[13],
-    t.flat[9]*t.flat[12],
-    t.flat[2]*t.flat[7],
-    t.flat[3]*t.flat[6],
-    t.flat[1]*t.flat[7],
-    t.flat[3]*t.flat[5],
-    t.flat[1]*t.flat[6],
-    t.flat[2]*t.flat[5],
-    t.flat[0]*t.flat[7],
-    t.flat[3]*t .flat[4],
-    t.flat[0]*t.flat[6],
-    t.flat[2]*t.flat[4],
-    t.flat[0]*t.flat[5],
-    t.flat[1]*t.flat[4]};
+    t.A[10]*t.A[15],
+    t.A[11]*t.A[14],
+    t.A[9]*t.A[15],
+    t.A[11]*t.A[13],
+    t.A[9]*t.A[14],
+    t.A[10]*t.A[13],
+    t.A[8]*t.A[15],
+    t.A[11]*t.A[12],
+    t.A[8]*t.A[14],
+    t.A[10]*t.A[12],
+    t.A[8]*t.A[13],
+    t.A[9]*t.A[12],
+    t.A[2]*t.A[7],
+    t.A[3]*t.A[6],
+    t.A[1]*t.A[7],
+    t.A[3]*t.A[5],
+    t.A[1]*t.A[6],
+    t.A[2]*t.A[5],
+    t.A[0]*t.A[7],
+    t.A[3]*t.A[4],
+    t.A[0]*t.A[6],
+    t.A[2]*t.A[4],
+    t.A[0]*t.A[5],
+    t.A[1]*t.A[4]};
   const float cofactors[16] = {
-    pairs[0]*t.flat[5] + pairs[3]*t.flat[6] + pairs[4]*t.flat[7] -
-    pairs[1]*t.flat[5] - pairs[2]*t.flat[6] - pairs[5]*t.flat[7],
-    pairs[1]*t.flat[4] + pairs[6]*t.flat[6] + pairs[9]*t.flat[7] -
-    pairs[0]*t.flat[4] - pairs[7]*t.flat[6] - pairs[8]*t.flat[7],
-    pairs[2]*t.flat[4] + pairs[7]*t.flat[5] + pairs[10]*t.flat[7] -
-    pairs[3]*t.flat[4] - pairs[6]*t.flat[5] - pairs[11]*t.flat[7],
-    pairs[5]*t.flat[4] + pairs[8]*t.flat[5] + pairs[11]*t.flat[6] -
-    pairs[4]*t.flat[4] - pairs[9]*t.flat[5] - pairs[10]*t.flat[6],
-    pairs[1]*t.flat[1] + pairs[2]*t.flat[2] + pairs[5]*t.flat[3] -
-    pairs[0]*t.flat[1] - pairs[3]*t.flat[2] - pairs[4]*t.flat[3],
-    pairs[0]*t.flat[0] + pairs[7]*t.flat[2] + pairs[8]*t.flat[3] -
-    pairs[1]*t.flat[0] - pairs[6]*t.flat[2] - pairs[9]*t.flat[3],
-    pairs[3]*t.flat[0] + pairs[6]*t.flat[1] + pairs[11]*t.flat[3] -
-    pairs[2]*t.flat[0] - pairs[7]*t.flat[1] - pairs[10]*t.flat[3],
-    pairs[4]*t.flat[0] + pairs[9]*t.flat[1] + pairs[10]*t.flat[2] -
-    pairs[5]*t.flat[0] - pairs[8]*t.flat[1] - pairs[11]*t.flat[2],
-    pairs[12]*t.flat[13] + pairs[15]*t.flat[14] + pairs[16]*t.flat[15] -
-    pairs[13]*t.flat[13] - pairs[14]*t.flat[14] - pairs[17]*t.flat[15],
-    pairs[13]*t.flat[12] + pairs[18]*t.flat[14] + pairs[21]*t.flat[15] -
-    pairs[12]*t.flat[12] - pairs[19]*t.flat[14] - pairs[20]*t.flat[15],
-    pairs[14]*t.flat[12] + pairs[19]*t.flat[13] + pairs[22]*t.flat[15] -
-    pairs[15]*t.flat[12] - pairs[18]*t.flat[13] - pairs[23]*t.flat[15],
-    pairs[17]*t.flat[12] + pairs[20]*t.flat[13] + pairs[23]*t.flat[14] -
-    pairs[16]*t.flat[12] - pairs[21]*t.flat[13] - pairs[22]*t.flat[14],
-    pairs[14]*t.flat[10] + pairs[17]*t.flat[11] + pairs[13]*t.flat[9] -
-    pairs[16]*t.flat[11] - pairs[12]*t.flat[9] - pairs[15]*t.flat[10],
-    pairs[20]*t.flat[11] + pairs[12]*t.flat[8] + pairs[19]*t.flat[10] -
-    pairs[18]*t.flat[10] - pairs[21]*t.flat[11] - pairs[13]*t.flat[8],
-    pairs[18]*t.flat[9] + pairs[23]*t.flat[11] + pairs[15]*t.flat[8] -
-    pairs[22]*t.flat[11] - pairs[14]*t.flat[8] - pairs[19]*t.flat[9],
-    pairs[22]*t.flat[10] + pairs[16]*t.flat[8] + pairs[21]*t.flat[9] -
-    pairs[20]*t.flat[9] - pairs[23]*t.flat[10] - pairs[17]*t.flat[8]};
-  const float det = 1.f/(t.flat[0]*cofactors[0] + t.flat[1]*cofactors[1] + t.flat[2]*cofactors[2] + t.flat[3]*cofactors[3]);
+    pairs[0]*t.A[5] + pairs[3]*t.A[6] + pairs[4]*t.A[7] -
+    pairs[1]*t.A[5] - pairs[2]*t.A[6] - pairs[5]*t.A[7],
+    pairs[1]*t.A[4] + pairs[6]*t.A[6] + pairs[9]*t.A[7] -
+    pairs[0]*t.A[4] - pairs[7]*t.A[6] - pairs[8]*t.A[7],
+    pairs[2]*t.A[4] + pairs[7]*t.A[5] + pairs[10]*t.A[7] -
+    pairs[3]*t.A[4] - pairs[6]*t.A[5] - pairs[11]*t.A[7],
+    pairs[5]*t.A[4] + pairs[8]*t.A[5] + pairs[11]*t.A[6] -
+    pairs[4]*t.A[4] - pairs[9]*t.A[5] - pairs[10]*t.A[6],
+    pairs[1]*t.A[1] + pairs[2]*t.A[2] + pairs[5]*t.A[3] -
+    pairs[0]*t.A[1] - pairs[3]*t.A[2] - pairs[4]*t.A[3],
+    pairs[0]*t.A[0] + pairs[7]*t.A[2] + pairs[8]*t.A[3] -
+    pairs[1]*t.A[0] - pairs[6]*t.A[2] - pairs[9]*t.A[3],
+    pairs[3]*t.A[0] + pairs[6]*t.A[1] + pairs[11]*t.A[3] -
+    pairs[2]*t.A[0] - pairs[7]*t.A[1] - pairs[10]*t.A[3],
+    pairs[4]*t.A[0] + pairs[9]*t.A[1] + pairs[10]*t.A[2] -
+    pairs[5]*t.A[0] - pairs[8]*t.A[1] - pairs[11]*t.A[2],
+    pairs[12]*t.A[13] + pairs[15]*t.A[14] + pairs[16]*t.A[15] -
+    pairs[13]*t.A[13] - pairs[14]*t.A[14] - pairs[17]*t.A[15],
+    pairs[13]*t.A[12] + pairs[18]*t.A[14] + pairs[21]*t.A[15] -
+    pairs[12]*t.A[12] - pairs[19]*t.A[14] - pairs[20]*t.A[15],
+    pairs[14]*t.A[12] + pairs[19]*t.A[13] + pairs[22]*t.A[15] -
+    pairs[15]*t.A[12] - pairs[18]*t.A[13] - pairs[23]*t.A[15],
+    pairs[17]*t.A[12] + pairs[20]*t.A[13] + pairs[23]*t.A[14] -
+    pairs[16]*t.A[12] - pairs[21]*t.A[13] - pairs[22]*t.A[14],
+    pairs[14]*t.A[10] + pairs[17]*t.A[11] + pairs[13]*t.A[9] -
+    pairs[16]*t.A[11] - pairs[12]*t.A[9] - pairs[15]*t.A[10],
+    pairs[20]*t.A[11] + pairs[12]*t.A[8] + pairs[19]*t.A[10] -
+    pairs[18]*t.A[10] - pairs[21]*t.A[11] - pairs[13]*t.A[8],
+    pairs[18]*t.A[9] + pairs[23]*t.A[11] + pairs[15]*t.A[8] -
+    pairs[22]*t.A[11] - pairs[14]*t.A[8] - pairs[19]*t.A[9],
+    pairs[22]*t.A[10] + pairs[16]*t.A[8] + pairs[21]*t.A[9] -
+    pairs[20]*t.A[9] - pairs[23]*t.A[10] - pairs[17]*t.A[8]};
+  const float det = 1.f/(t.A[0]*cofactors[0] + t.A[1]*cofactors[1] + t.A[2]*cofactors[2] + t.A[3]*cofactors[3]);
 
   mat4 res;
   for (int i=0; i<16; ++i) {
-    res.flat[i] = cofactors[i]*det;
+    res.A[i] = cofactors[i]*det;
   }
   return res;
 }

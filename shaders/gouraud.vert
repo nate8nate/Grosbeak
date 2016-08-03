@@ -1,7 +1,7 @@
 #version 330 core
 struct Material {
   vec3 specular;
-  float shininess;
+  float hardness;
 };
 
 struct DirLight {
@@ -18,7 +18,7 @@ struct PointLight {
 };
 
 #define NUM_DIR_LIGHTS %i
-#define NUM_POINT_LIGHTS &i
+#define NUM_POINT_LIGHTS %i
 
 out vec3 vColor;
 
@@ -58,7 +58,7 @@ void main()
     float dScalar = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = dirLights[d].diffuse * (dScalar * color);
 
-    float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.hardness);
     vec3 specular = sScalar * material.specular;
 
     result += (ambient + diffuse + specular);
@@ -76,7 +76,7 @@ void main()
     float dScalar = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = attenuation * (pointLights[p].diffuse * (dScalar * color));
 
-    float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    float sScalar = pow(max(dot(viewDir, reflectDir), 0.0), material.hardness);
     vec3 specular = attenuation * (sScalar * material.specular);
 
     result += (ambient + diffuse + specular);

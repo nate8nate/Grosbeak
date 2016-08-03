@@ -7,6 +7,7 @@
 #include <string.h>
 #include <OpenGL/gl3.h>
 #include "linear_math.hpp"
+#include "player.hpp"
 #include "shader.hpp"
 
 struct vertex {
@@ -26,7 +27,7 @@ struct mesh {
 struct material {
   vec3 diffuse;
   vec3 specular;
-  GLfloat shininess;
+  GLfloat hardness;
 };
 
 struct entity {
@@ -59,10 +60,10 @@ struct materialShader {
   GLint viewLoc;
   GLint projectionLoc;
 
-  GLint worldAmbient;
+  GLint worldAmbientLoc;
   GLint matDiffuseLoc;
   GLint matSpecularLoc;
-  GLint matShininessLoc;
+  GLint matHardnessLoc;
 
   GLint *dirLightDirectionLocs;
   GLint *dirLightDiffuseLocs;
@@ -83,8 +84,8 @@ struct scene {
   GLuint VBO;
   GLuint EBO;
   materialShader matShader;
-  vec3 skyColor;
-  vec3 ambientColor;
+  vec3 sky;
+  vec3 ambient;
 
   mesh *meshes;
   entity *entities;
@@ -94,6 +95,6 @@ struct scene {
 
 scene loadScene(const char *sceneName);
 void deleteScene(scene s);
-void drawScene(scene s);
+void drawScene(scene s, player p, mat4 projection);
 
 #endif

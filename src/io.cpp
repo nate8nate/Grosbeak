@@ -1,8 +1,8 @@
 #include "io.hpp"
 
-const char * fileToChars(const char *filepath)
+const char *fileToChars(const char *filepath)
 {
-  char *result = 0;
+  static char *result = NULL;
 
   FILE *file;
   file = fopen(filepath, "r");
